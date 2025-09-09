@@ -1,0 +1,4 @@
+telebot
+flask
+pyTelegramBotAPI
+openpyxl  # Для работы с Excel-файлами
