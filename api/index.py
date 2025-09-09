@@ -374,10 +374,27 @@ def webhook_and_index():
             print(f"An error occurred in webhook handler: {e}")
         return 'OK', 200
 
-# --- Setup Endpoint (from Template) ---
+# --- Setup Endpoint (Safe Version) ---
 @app.route('/set_webhook')
 def set_webhook():
-    url = f"https://{PUBLIC_URL}/"
-    bot.remove_webhook()
-    bot.set_webhook(url=url, secret_token=WEBHOOK_SECRET)
-    return f"Webhook successfully set to {url}"
+    try:
+        # The URL that the webhook should be set to
+        target_url = f"https://{PUBLIC_URL}/"
+        
+        # Get current webhook info from Telegram
+        current_webhook_info = bot.get_webhook_info()
+        
+        # Check if the webhook is already set to the target URL
+        if current_webhook_info and current_webhook_info.url == target_url:
+            return f"Webhook is already set correctly to {target_url}", 200
+            
+        # If not, remove the old one (if any) and set the new one
+        bot.remove_webhook()
+        time.sleep(0.5) # Give it a moment
+        bot.set_webhook(url=target_url, secret_token=WEBHOOK_SECRET)
+        
+        return f"Webhook successfully set to {target_url}", 200
+        
+    except Exception as e:
+        print(f"Error in set_webhook: {e}")
+        return f"An error occurred: {e}", 500
