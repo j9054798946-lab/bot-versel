@@ -95,54 +95,264 @@ def send_welcome(message):
 @bot.callback_query_handler(func=lambda call: True)
 def handle_callback(call):
     try:
+        # Главное меню
         if call.data == 'video_menu':
-            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="📹 Видеоматериалы:", reply_markup=video_menu())
+            bot.answer_callback_query(call.id)
+            try:
+                bot.delete_message(call.message.chat.id, call.message.message_id)
+            except Exception as e:
+                print(f"Ошибка удаления сообщения: {e}")
+            
+            time.sleep(0.1)
+            
+            bot.send_message(
+                call.message.chat.id,
+                "📹 Видеоматериалы:",
+                reply_markup=video_menu()
+            )
+        
+        # Контакты
         elif call.data == 'contacts_menu':
-            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="📞 Наши контакты:", reply_markup=contacts_menu())
+            bot.answer_callback_query(call.id)
+            try:
+                bot.delete_message(call.message.chat.id, call.message.message_id)
+            except Exception as e:
+                print(f"Ошибка удаления сообщения: {e}")
+            
+            time.sleep(0.1)
+            
+            bot.send_message(
+                call.message.chat.id,
+                "📞 Наши контакты:",
+                reply_markup=contacts_menu()
+            )
+        
+        # Оставить заявку
         elif call.data == 'make_request':
-            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="✍️ Для оформления заявки на консультацию, пожалуйста, выберите способ оплаты:", reply_markup=payment_menu())
+            bot.answer_callback_query(call.id)
+            try:
+                bot.delete_message(call.message.chat.id, call.message.message_id)
+            except Exception as e:
+                print(f"Ошибка удаления сообщения: {e}")
+            
+            time.sleep(0.1)
+            
+            bot.send_message(
+                call.message.chat.id,
+                "✍️ Для оформления заявки на консультацию, пожалуйста, выберите способ оплаты:",
+                reply_markup=payment_menu()
+            )
+        
+        # Отзывы
         elif call.data == 'reviews_menu':
-            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="💬 Отзывы наших клиентов:", reply_markup=reviews_menu())
+            bot.answer_callback_query(call.id)
+            try:
+                bot.delete_message(call.message.chat.id, call.message.message_id)
+            except Exception as e:
+                print(f"Ошибка удаления сообщения: {e}")
+            
+            time.sleep(0.1)
+            
+            bot.send_message(
+                call.message.chat.id,
+                "💬 Отзывы наших клиентов:",
+                reply_markup=reviews_menu()
+            )
+        
+        # Частые вопросы
         elif call.data == 'faq_menu':
-            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="❓ Частые вопросы:", reply_markup=faq_menu())
+            bot.answer_callback_query(call.id)
+            try:
+                bot.delete_message(call.message.chat.id, call.message.message_id)
+            except Exception as e:
+                print(f"Ошибка удаления сообщения: {e}")
+            
+            time.sleep(0.1)
+            
+            bot.send_message(
+                call.message.chat.id,
+                "❓ Частые вопросы:",
+                reply_markup=faq_menu()
+            )
+        
+        # Прайс
         elif call.data == 'show_price':
             bot.answer_callback_query(call.id)
-            bot.delete_message(call.message.chat.id, call.message.message_id)
-            # NOTE: File sending from a serverless function can be tricky.
-            # The file 'price.xlsx' must be in the same directory as this index.py file.
+            print("Попытка отправить прайс-лист...")
+
+            # Удаляем текущее сообщение с меню
+            try:
+                bot.delete_message(call.message.chat.id, call.message.message_id)
+                print("Сообщение с меню удалено")
+            except Exception as e:
+                print(f"Ошибка удаления сообщения: {e}")
+
+            # Небольшая задержка для надежности
+            time.sleep(0.2)
+
+            # Проверяем существование файла
             file_path = os.path.join(os.path.dirname(__file__), 'price.xlsx')
             if os.path.exists(file_path):
-                with open(file_path, 'rb') as price_file:
-                    bot.send_document(call.message.chat.id, price_file, caption="💰 Актуальный прайс-лист на консультации", reply_markup=price_menu())
+                print("Файл price.xlsx найден")
+                try:
+                    with open(file_path, 'rb') as price_file:
+                        bot.send_document(
+                            call.message.chat.id,
+                            price_file,
+                            caption="💰 Актуальный прайс-лист на консультации",
+                            reply_markup=price_menu()  # Добавляем кнопку "назад"
+                        )
+                    print("Прайс-лист успешно отправлен")
+                except Exception as e:
+                    print(f"Ошибка при отправке файла: {e}")
+                    bot.send_message(
+                        call.message.chat.id,
+                        "❌ Произошла ошибка при отправке прайс-листа. Пожалуйста, попробуйте позже.",
+                        reply_markup=main_menu()
+                    )
             else:
-                bot.send_message(call.message.chat.id, "❌ Файл прайс-листа не найден. Пожалуйста, ��ообщите администратору.", reply_markup=main_menu())
+                print("Файл price.xlsx НЕ найден!")
+                bot.send_message(
+                    call.message.chat.id,
+                    "❌ Файл прайс-листа не найден. Пожалуйста, сообщите администратору.",
+                    reply_markup=main_menu()
+                )
+        
+        # Резерв
         elif call.data == 'reserve':
-            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="🔒 Функция резервирования временно недоступна. Мы работаем над её внедрением!", reply_markup=main_menu())
+            bot.answer_callback_query(call.id)
+            try:
+                bot.delete_message(call.message.chat.id, call.message.message_id)
+            except Exception as e:
+                print(f"Ошибка удаления сообщения: {e}")
+            
+            time.sleep(0.1)
+            
+            bot.send_message(
+                call.message.chat.id,
+                "🔒 Функция резервирования временно недоступна. Мы работаем над её внедрением!",
+                reply_markup=main_menu()
+            )
+        
+        # Возврат в главное меню
         elif call.data == 'back_to_main':
-            bot.delete_message(call.message.chat.id, call.message.message_id)
-            bot.send_message(call.message.chat.id, "👋 Главное меню:", reply_markup=main_menu())
+            bot.answer_callback_query(call.id)
+            try:
+                bot.delete_message(call.message.chat.id, call.message.message_id)
+            except Exception as e:
+                print(f"Ошибка удаления сообщения: {e}")
+            
+            time.sleep(0.1)
+            
+            bot.send_message(
+                call.message.chat.id,
+                "👋 Главное меню:",
+                reply_markup=main_menu()
+            )
+        
+        # Возврат из прайс-листа
         elif call.data == 'back_to_main_from_price':
-            bot.delete_message(call.message.chat.id, call.message.message_id)
-            bot.send_message(call.message.chat.id, "👋 Главное меню:", reply_markup=main_menu())
+            bot.answer_callback_query(call.id)
+            try:
+                bot.delete_message(call.message.chat.id, call.message.message_id)
+                print("Сообщение с прайсом удалено")
+            except Exception as e:
+                print(f"Ошибка удаления сообщения с прайсом: {e}")
+                bot.send_message(
+                    call.message.chat.id,
+                    "⚠️ Не удалось удалить предыдущее сообщение",
+                    reply_markup=main_menu()
+                )
+                return
+            
+            time.sleep(0.1)
+            
+            bot.send_message(
+                call.message.chat.id,
+                "👋 Главное меню:",
+                reply_markup=main_menu()
+            )
+        
+        # Ссылки на видео
         elif call.data.startswith('video_link_'):
             link_num = call.data.split('_')[-1]
-            bot.answer_callback_query(call.id, f"Видео {link_num}")
+            bot.answer_callback_query(call.id)
+            bot.send_message(call.message.chat.id, f"📹 Вот ссылка {link_num}: [Перейти](https://example.com/video{link_num})", parse_mode='Markdown')
+        
+        # Ссылки на отзывы
         elif call.data.startswith('review_link_'):
             link_num = call.data.split('_')[-1]
-            bot.answer_callback_query(call.id, f"Отзыв {link_num}")
+            bot.answer_callback_query(call.id)
+            bot.send_message(call.message.chat.id, f"💬 Вот отзыв {link_num}: [Читать](https://example.com/review{link_num})", parse_mode='Markdown')
+        
+        # Вопросы FAQ
         elif call.data.startswith('faq_question_'):
             q_num = call.data.split('_')[-1]
-            bot.answer_callback_query(call.id, f"Ответ на вопрос {q_num}")
+            bot.answer_callback_query(call.id)
+            bot.send_message(call.message.chat.id, f"❓ Ответ на вопрос {q_num}: Ответ")
+        
+        # Контакты
         elif call.data.startswith('contact_'):
             contact_type = call.data.split('_')[-1]
-            contact_info = {'address': '📍 Наш адрес: ...', 'email': '📧 Email: ...', 'phone': '📱 Телефон: ...', 'telegram': '💬 Telegram: ...', 'website': '🌐 Сайт: ...'}
-            bot.answer_callback_query(call.id, contact_info.get(contact_type, "Информация недоступна"))
+            contact_info = {
+                'address': '📍 Наш адрес: г. Москва, ул. Примерная, д. 1, офис 123',
+                'email': '📧 Email: info@yourcompany.com',
+                'phone': '📱 Телефон: +7 905 479-89-46',
+                'telegram': '💬 Telegram: @yourcompany',
+                'website': '🌐 Сайт: https://yourcompany.com'
+            }
+            bot.answer_callback_query(call.id)
+            bot.send_message(call.message.chat.id, contact_info.get(contact_type, "Информация недоступна"))
+        
+        # Оплата СБП
         elif call.data == 'payment_sbp':
-            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="💳 *Оплата через СБП* ...", parse_mode='Markdown', reply_markup=main_menu())
+            bot.answer_callback_query(call.id)
+            try:
+                bot.delete_message(call.message.chat.id, call.message.message_id)
+            except Exception as e:
+                print(f"Ошибка удаления сообщения: {e}")
+            
+            time.sleep(0.1)
+            
+            bot.send_message(
+                call.message.chat.id,
+                "💳 *Оплата через Систему Быстрых Платежей (СБП)*\n\n"
+                "Для оплаты консультации:\n"
+                "1. Откройте приложение вашего банка\n"
+                "2. Перейдите в раздел «Платежи» → «СБП»\n"
+                "3. Введите номер телефона: `+7 905 479-89-46`\n"
+                "4. Укажите сумму согласно прайсу\n"
+                "5. В комментарии укажите: `Консультация Telegram`\n\n"
+                "После оплаты отправьте нам скриншот чека для подтверждения.",
+                parse_mode='Markdown',
+                reply_markup=main_menu()
+            )
+        
+        # Оплата картой
         elif call.data == 'payment_card':
-            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="💳 *Оплата банковской картой* ...", parse_mode='Markdown', reply_markup=main_menu())
+            bot.answer_callback_query(call.id)
+            try:
+                bot.delete_message(call.message.chat.id, call.message.message_id)
+            except Exception as e:
+                print(f"Ошибка удаления сообщения: {e}")
+            
+            time.sleep(0.1)
+            
+            bot.send_message(
+                call.message.chat.id,
+                "💳 *Оплата банковской картой*\n\n"
+                "Для оплаты консультации:\n"
+                "1. Перейдите по ссылке для оплаты: [Оплатить картой](https://example.com/payment)\n"
+                "2. Укажите сумму согласно прайсу\n"
+                "3. В комментарии укажите: `Консультация Telegram`\n\n"
+                "После оплаты отправьте нам скриншот чека для подтверждения.",
+                parse_mode='Markdown',
+                reply_markup=main_menu()
+            )
+    
     except Exception as e:
-        print(f"Error in callback handler: {e}")
+        print(f"Ошибка в обработчике callback: {e}")
+        bot.answer_callback_query(call.id, text="Произошла ошибка. Пожалуйста, попробуйте позже.", show_alert=True)
 
 
 # --- Main Webhook Handler (from Template) ---
