@@ -119,7 +119,8 @@ def handle_callback(call):
         elif call.data == 'reserve':
             bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="🔒 Функция резервирования временно недоступна. Мы работаем над её внедрением!", reply_markup=main_menu())
         elif call.data == 'back_to_main':
-            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="👋 Главное меню:", reply_markup=main_menu())
+            bot.delete_message(call.message.chat.id, call.message.message_id)
+            bot.send_message(call.message.chat.id, "👋 Главное меню:", reply_markup=main_menu())
         elif call.data == 'back_to_main_from_price':
             bot.delete_message(call.message.chat.id, call.message.message_id)
             bot.send_message(call.message.chat.id, "👋 Главное меню:", reply_markup=main_menu())
