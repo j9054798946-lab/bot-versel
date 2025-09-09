@@ -15,7 +15,6 @@ PUBLIC_URL = os.environ.get('PUBLIC_URL')
 if not TOKEN or not WEBHOOK_SECRET or not PUBLIC_URL:
     raise ValueError("FATAL ERROR: TELEGRAM_TOKEN, WEBHOOK_SECRET, and PUBLIC_URL environment variables must be set.")
 
-bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
 
@@ -358,6 +357,7 @@ def handle_callback(call):
 # --- Main Webhook Handler (from Template) ---
 @app.route('/', methods=['GET', 'POST'])
 def webhook_and_index():
+    bot = telebot.TeleBot(TOKEN) # Инициализация бота для каждого запроса
     if request.method == 'GET':
         return "Bot is running!", 200
     if request.method == 'POST':
@@ -369,7 +369,10 @@ def webhook_and_index():
             update = telebot.types.Update.de_json(raw_data)
             print("Update received, passing to bot processor.")
             # Let the bot's internal router handle all update types
+            start_time = time.time()
             bot.process_new_updates([update])
+            end_time = time.time()
+            print(f"Bot processed update in {end_time - start_time:.4f} seconds.")
         except Exception as e:
             print(f"An error occurred in webhook handler: {e}")
         return 'OK', 200
@@ -377,6 +380,7 @@ def webhook_and_index():
 # --- Setup Endpoint (Safe Version) ---
 @app.route('/set_webhook')
 def set_webhook():
+    bot = telebot.TeleBot(TOKEN) # Инициализация бота для каждого запроса
     try:
         target_url = f"https://{PUBLIC_URL}/"
         print(f"Attempting to set webhook to: {target_url}")
