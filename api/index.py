@@ -56,6 +56,12 @@ def contacts_menu():
     markup.add(InlineKeyboardButton("⬅️ Назад", callback_data='back_to_main'))
     return markup
 
+# Меню деталей контакта с кнопкой "назад" в меню контактов
+def contact_detail_menu():
+    markup = InlineKeyboardMarkup(row_width=1)
+    markup.add(InlineKeyboardButton("⬅️ Назад", callback_data='back_to_contacts_menu'))
+    return markup
+
 # Меню отзывов
 def reviews_menu():
     markup = InlineKeyboardMarkup(row_width=1)
@@ -220,6 +226,15 @@ def handle_callback(call):
             )
         
         # Возврат в главное меню
+        elif call.data == 'back_to_contacts_menu':
+            bot.answer_callback_query(call.id)
+            delete_previous_message(call.message.chat.id, call.message.message_id, "back_to_contacts_menu")
+            time.sleep(0.1)
+            bot.send_message(
+                call.message.chat.id,
+                "📞 Наши контакты:",
+                reply_markup=contacts_menu()
+            )
         elif call.data == 'back_to_main':
             bot.answer_callback_query(call.id)
             delete_previous_message(call.message.chat.id, call.message.message_id, "back_to_main")
@@ -272,7 +287,9 @@ def handle_callback(call):
                 'website': '🌐 Сайт: https://yourcompany.com'
             }
             bot.answer_callback_query(call.id)
-            bot.send_message(call.message.chat.id, contact_info.get(contact_type, "Информация недоступна"))
+            delete_previous_message(call.message.chat.id, call.message.message_id, f"contact_detail_{contact_type}")
+            time.sleep(0.1)
+            bot.send_message(call.message.chat.id, contact_info.get(contact_type, "Информация недоступна"), reply_markup=contact_detail_menu())
         
         # Оплата СБП
         elif call.data == 'payment_sbp':
