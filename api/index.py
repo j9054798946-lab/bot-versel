@@ -89,7 +89,12 @@ def price_menu():
 # Обработчик команды /start
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.send_message(message.chat.id, "👋 Добро пожаловать! Выберите интересующий раздел:", reply_markup=main_menu())
+    print(f"[Handler] Received /start command from chat ID: {message.chat.id}")
+    try:
+        bot.send_message(message.chat.id, "👋 Добро пожаловать! Выберите интересующий раздел:", reply_markup=main_menu())
+        print(f"[Handler] Sent welcome message to chat ID: {message.chat.id}")
+    except Exception as e:
+        print(f"[Handler] Error sending welcome message to chat ID {message.chat.id}: {e}")
 
 # Обработчик callback-кнопок
 @bot.callback_query_handler(func=lambda call: True)
