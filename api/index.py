@@ -392,6 +392,16 @@ def webhook_and_index():
     except Exception as e:
         print(f"[Webhook Setup in Handler] Error during automatic webhook setup: {e}")
 
+    # --- Automatic Handler Re-registration (Workaround for Vercel cold starts) ---
+    # This ensures handlers are always registered, even if global state is lost.
+    if not bot.message_handlers or not bot.callback_query_handlers:
+        print("[Handler Re-registration] Handlers not found or lost. Re-registering...")
+        # Explicitly call handler functions to re-register them with the bot object
+        send_welcome(None) # This will re-register the /start handler
+        handle_callback(None) # This will re-register the callback query handler
+        print(f"[Handler Re-registration] Message handlers after re-reg: {len(bot.message_handlers)}")
+        print(f"[Handler Re-registration] Callback handlers after re-reg: {len(bot.callback_query_handlers)}")
+
     if request.method == 'GET':
         return "Bot is running!", 200
     if request.method == 'POST':
@@ -403,7 +413,6 @@ def webhook_and_index():
             update = telebot.types.Update.de_json(raw_data)
             print(f"[Webhook Handler] Received Update object: {update}")
             print(f"[Webhook Handler] Registered message handlers: {len(bot.message_handlers)}")
-            print(f"[Webhook Handler] Registered callback query handlers: {len(bot.callback_query_handlers)}")
             print("Update received, passing to bot processor.")
             # Let the bot's internal router handle all update types
             start_time = time.time()
