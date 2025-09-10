@@ -416,20 +416,27 @@ def webhook_and_index():
             print(f"[Webhook Handler] Registered callback query handlers: {len(bot.callback_query_handlers)}")
             print(f"[Webhook Handler] Registered callback query handlers: {len(bot.callback_query_handlers)}")
 
-            # --- Manual /start command dispatch for debugging (Temporary) ---
-            if update.message and update.message.text == '/start':
-                print("[DEBUG] Manually dispatching /start command.")
-                send_welcome(update.message)
-                print("[DEBUG] Manual /start dispatch complete.")
-                return 'OK', 200 # Return early after manual dispatch
-            # --- End Manual /start command dispatch ---
-
             print("Update received, passing to bot processor.")
-            # Let the bot's internal router handle all update types
-            start_time = time.time()
-            bot.process_new_updates([update])
-            end_time = time.time()
-            print(f"Bot processed update in {end_time - start_time:.4f} seconds.")
+            print("Update received, passing to bot processor.")
+            # --- Manual Update Dispatch (Workaround for Vercel cold starts) ---
+            # This ensures updates are processed even if bot.process_new_updates fails to dispatch.
+            if update.message:
+                print(f"[DEBUG] Manual dispatching message: {update.message.text}")
+                if update.message.text == '/start':
+                    send_welcome(update.message)
+                # Add other message handlers here if needed, or let bot.process_new_updates handle them
+            elif update.callback_query:
+                print(f"[DEBUG] Manual dispatching callback query: {update.callback_query.data}")
+                handle_callback(update.callback_query)
+            else:
+                print("[DEBUG] No manual dispatch for this update type. Falling back to bot.process_new_updates.")
+                # Let the bot's internal router handle all update types
+                start_time = time.time()
+                bot.process_new_updates([update])
+                end_time = time.time()
+                print(f"Bot processed update in {end_time - start_time:.4f} seconds.")
+            # --- End Manual Update Dispatch ---
+
         except Exception as e:
             print(f"An error occurred in webhook handler: {e}")
         return 'OK', 200
