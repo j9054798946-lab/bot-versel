@@ -5,8 +5,6 @@ from flask import Flask, request
 import time
 import json
 
-print("--- Script index.py started ---")
-
 # --- Configuration ---
 # Load environment variables. These must be set in your Vercel project settings.
 TOKEN = os.environ.get('TELEGRAM_TOKEN')
@@ -19,35 +17,6 @@ if not TOKEN or not WEBHOOK_SECRET or not PUBLIC_URL:
 
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
-
-# --- Automatic Webhook Setup on Application Start (Attempt 3) ---
-# This block will run when the Vercel function initializes.
-# It ensures the webhook is always set to the correct URL.
-try:
-    target_url = f"https://{PUBLIC_URL}/"
-    print(f"[Webhook Setup] Checking webhook status for: {target_url}")
-    current_webhook_info = bot.get_webhook_info()
-
-    if not current_webhook_info or current_webhook_info.url != target_url:
-        print("[Webhook Setup] Webhook not set or incorrect. Attempting to set...")
-        print("[Webhook Setup] Removing any existing webhook...")
-        bot.remove_webhook()
-        time.sleep(0.5) # Give Telegram a moment to process
-
-        print(f"[Webhook Setup] Setting new webhook to {target_url} with secret token...")
-        bot.set_webhook(url=target_url, secret_token=WEBHOOK_SECRET)
-        print("[Webhook Setup] Webhook set command sent to Telegram.")
-
-        # Verify if the webhook was set correctly (optional, but good for debugging)
-        current_webhook_info_after_set = bot.get_webhook_info()
-        if current_webhook_info_after_set and current_webhook_info_after_set.url == target_url:
-            print(f"[Webhook Setup] Webhook successfully verified to be set to {target_url}")
-        else:
-            print(f"[Webhook Setup] Webhook verification failed. Current URL: {current_webhook_info_after_set.url if current_webhook_info_after_set else 'None'}")
-    else:
-        print(f"[Webhook Setup] Webhook already correctly set to: {current_webhook_info.url}")
-except Exception as e:
-    print(f"[Webhook Setup] Error during automatic webhook setup: {e}")
 
 
 # --- Bot Logic (Menus and Handlers from your original file) ---
@@ -389,6 +358,35 @@ def handle_callback(call):
 # --- Main Webhook Handler (from Template) ---
 @app.route('/', methods=['GET', 'POST'])
 def webhook_and_index():
+    print("--- Request received by webhook_and_index ---")
+    # --- Automatic Webhook Setup on Request (Attempt 4) ---
+    # This ensures the webhook is always set to the correct URL, even after cold starts.
+    try:
+        target_url = f"https://{PUBLIC_URL}/"
+        print(f"[Webhook Setup in Handler] Checking webhook status for: {target_url}")
+        current_webhook_info = bot.get_webhook_info()
+
+        if not current_webhook_info or current_webhook_info.url != target_url:
+            print("[Webhook Setup in Handler] Webhook not set or incorrect. Attempting to set...")
+            print("[Webhook Setup in Handler] Removing any existing webhook...")
+            bot.remove_webhook()
+            time.sleep(0.5) # Give Telegram a moment to process
+
+            print(f"[Webhook Setup in Handler] Setting new webhook to {target_url} with secret token...")
+            bot.set_webhook(url=target_url, secret_token=WEBHOOK_SECRET)
+            print("[Webhook Setup in Handler] Webhook set command sent to Telegram.")
+
+            # Verify if the webhook was set correctly (optional, but good for debugging)
+            current_webhook_info_after_set = bot.get_webhook_info()
+            if current_webhook_info_after_set and current_webhook_info_after_set.url == target_url:
+                print(f"[Webhook Setup in Handler] Webhook successfully verified to be set to {target_url}")
+            else:
+                print(f"[Webhook Setup in Handler] Webhook verification failed. Current URL: {current_webhook_info_after_set.url if current_webhook_info_after_set else 'None'}")
+        else:
+            print(f"[Webhook Setup in Handler] Webhook already correctly set to: {current_webhook_info.url}")
+    except Exception as e:
+        print(f"[Webhook Setup in Handler] Error during automatic webhook setup: {e}")
+
     if request.method == 'GET':
         return "Bot is running!", 200
     if request.method == 'POST':
