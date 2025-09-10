@@ -86,6 +86,11 @@ def price_menu():
     markup.add(InlineKeyboardButton("⬅️ Назад", callback_data='back_to_main_from_price'))
     return markup
 
+# Временный общий обработчик для отладки
+@bot.message_handler(func=lambda message: True)
+def debug_all_messages(message):
+    print(f"[DEBUG] Received message: Chat ID={message.chat.id}, Type={message.content_type}, Text={message.text}")
+
 # Обработчик команды /start
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
