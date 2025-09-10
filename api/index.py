@@ -413,6 +413,17 @@ def webhook_and_index():
             update = telebot.types.Update.de_json(raw_data)
             print(f"[Webhook Handler] Received Update object: {update}")
             print(f"[Webhook Handler] Registered message handlers: {len(bot.message_handlers)}")
+            print(f"[Webhook Handler] Registered callback query handlers: {len(bot.callback_query_handlers)}")
+            print(f"[Webhook Handler] Registered callback query handlers: {len(bot.callback_query_handlers)}")
+
+            # --- Manual /start command dispatch for debugging (Temporary) ---
+            if update.message and update.message.text == '/start':
+                print("[DEBUG] Manually dispatching /start command.")
+                send_welcome(update.message)
+                print("[DEBUG] Manual /start dispatch complete.")
+                return 'OK', 200 # Return early after manual dispatch
+            # --- End Manual /start command dispatch ---
+
             print("Update received, passing to bot processor.")
             # Let the bot's internal router handle all update types
             start_time = time.time()
