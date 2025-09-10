@@ -96,6 +96,14 @@ def send_welcome(message):
     except Exception as e:
         print(f"[Handler] Error sending welcome message to chat ID {message.chat.id}: {e}")
 
+# Вспомогательная функция для удаления предыдущего сообщения
+def delete_previous_message(chat_id, message_id, context=""):
+    try:
+        bot.delete_message(chat_id, message_id)
+        print(f"[Message Deletion] Successfully deleted message {message_id} in chat {chat_id} ({context}).")
+    except Exception as e:
+        print(f"[Message Deletion] Failed to delete message {message_id} in chat {chat_id} ({context}): {e}")
+
 # Обработчик callback-кнопок
 @bot.callback_query_handler(func=lambda call: True)
 def handle_callback(call):
@@ -103,11 +111,7 @@ def handle_callback(call):
         # Главное меню
         if call.data == 'video_menu':
             bot.answer_callback_query(call.id)
-            try:
-                bot.delete_message(call.message.chat.id, call.message.message_id)
-            except Exception as e:
-                print(f"Ошибка удаления сообщения: {e}")
-            
+            delete_previous_message(call.message.chat.id, call.message.message_id, "video_menu")
             time.sleep(0.1)
             
             bot.send_message(
@@ -119,11 +123,7 @@ def handle_callback(call):
         # Контакты
         elif call.data == 'contacts_menu':
             bot.answer_callback_query(call.id)
-            try:
-                bot.delete_message(call.message.chat.id, call.message.message_id)
-            except Exception as e:
-                print(f"Ошибка удаления сообщения: {e}")
-            
+            delete_previous_message(call.message.chat.id, call.message.message_id, "contacts_menu")
             time.sleep(0.1)
             
             bot.send_message(
@@ -135,11 +135,7 @@ def handle_callback(call):
         # Оставить заявку
         elif call.data == 'make_request':
             bot.answer_callback_query(call.id)
-            try:
-                bot.delete_message(call.message.chat.id, call.message.message_id)
-            except Exception as e:
-                print(f"Ошибка удаления сообщения: {e}")
-            
+            delete_previous_message(call.message.chat.id, call.message.message_id, "make_request")
             time.sleep(0.1)
             
             bot.send_message(
@@ -151,11 +147,7 @@ def handle_callback(call):
         # Отзывы
         elif call.data == 'reviews_menu':
             bot.answer_callback_query(call.id)
-            try:
-                bot.delete_message(call.message.chat.id, call.message.message_id)
-            except Exception as e:
-                print(f"Ошибка удаления сообщения: {e}")
-            
+            delete_previous_message(call.message.chat.id, call.message.message_id, "reviews_menu")
             time.sleep(0.1)
             
             bot.send_message(
@@ -167,11 +159,7 @@ def handle_callback(call):
         # Частые вопросы
         elif call.data == 'faq_menu':
             bot.answer_callback_query(call.id)
-            try:
-                bot.delete_message(call.message.chat.id, call.message.message_id)
-            except Exception as e:
-                print(f"Ошибка удаления сообщения: {e}")
-            
+            delete_previous_message(call.message.chat.id, call.message.message_id, "faq_menu")
             time.sleep(0.1)
             
             bot.send_message(
@@ -186,11 +174,7 @@ def handle_callback(call):
             print("Попытка отправить прайс-лист...")
 
             # Удаляем текущее сообщение с меню
-            try:
-                bot.delete_message(call.message.chat.id, call.message.message_id)
-                print("Сообщение с меню удалено")
-            except Exception as e:
-                print(f"Ошибка удаления сообщения: {e}")
+            delete_previous_message(call.message.chat.id, call.message.message_id, "show_price")
 
             # Небольшая задержка для надежности
             time.sleep(0.2)
@@ -226,11 +210,7 @@ def handle_callback(call):
         # Резерв
         elif call.data == 'reserve':
             bot.answer_callback_query(call.id)
-            try:
-                bot.delete_message(call.message.chat.id, call.message.message_id)
-            except Exception as e:
-                print(f"Ошибка удаления сообщения: {e}")
-            
+            delete_previous_message(call.message.chat.id, call.message.message_id, "reserve")
             time.sleep(0.1)
             
             bot.send_message(
@@ -242,11 +222,7 @@ def handle_callback(call):
         # Возврат в главное меню
         elif call.data == 'back_to_main':
             bot.answer_callback_query(call.id)
-            try:
-                bot.delete_message(call.message.chat.id, call.message.message_id)
-            except Exception as e:
-                print(f"Ошибка удаления сообщения: {e}")
-            
+            delete_previous_message(call.message.chat.id, call.message.message_id, "back_to_main")
             time.sleep(0.1)
             
             bot.send_message(
@@ -258,18 +234,7 @@ def handle_callback(call):
         # Возврат из прайс-листа
         elif call.data == 'back_to_main_from_price':
             bot.answer_callback_query(call.id)
-            try:
-                bot.delete_message(call.message.chat.id, call.message.message_id)
-                print("Сообщение с прайсом удалено")
-            except Exception as e:
-                print(f"Ошибка удаления сообщения с прайсом: {e}")
-                bot.send_message(
-                    call.message.chat.id,
-                    "⚠️ Не удалось удалить предыдущее сообщение",
-                    reply_markup=main_menu()
-                )
-                return
-            
+            delete_previous_message(call.message.chat.id, call.message.message_id, "back_to_main_from_price")
             time.sleep(0.1)
             
             bot.send_message(
@@ -312,11 +277,7 @@ def handle_callback(call):
         # Оплата СБП
         elif call.data == 'payment_sbp':
             bot.answer_callback_query(call.id)
-            try:
-                bot.delete_message(call.message.chat.id, call.message.message_id)
-            except Exception as e:
-                print(f"Ошибка удаления сообщения: {e}")
-            
+            delete_previous_message(call.message.chat.id, call.message.message_id, "payment_sbp")
             time.sleep(0.1)
             
             bot.send_message(
@@ -336,11 +297,7 @@ def handle_callback(call):
         # Оплата картой
         elif call.data == 'payment_card':
             bot.answer_callback_query(call.id)
-            try:
-                bot.delete_message(call.message.chat.id, call.message.message_id)
-            except Exception as e:
-                print(f"Ошибка удаления сообщения: {e}")
-            
+            delete_previous_message(call.message.chat.id, call.message.message_id, "payment_card")
             time.sleep(0.1)
             
             bot.send_message(
@@ -414,9 +371,7 @@ def webhook_and_index():
             print(f"[Webhook Handler] Received Update object: {update}")
             print(f"[Webhook Handler] Registered message handlers: {len(bot.message_handlers)}")
             print(f"[Webhook Handler] Registered callback query handlers: {len(bot.callback_query_handlers)}")
-            print(f"[Webhook Handler] Registered callback query handlers: {len(bot.callback_query_handlers)}")
 
-            print("Update received, passing to bot processor.")
             print("Update received, passing to bot processor.")
             # --- Manual Update Dispatch (Workaround for Vercel cold starts) ---
             # This ensures updates are processed even if bot.process_new_updates fails to dispatch.
