@@ -401,6 +401,7 @@ def webhook_and_index():
         try:
             raw_data = request.stream.read().decode('utf-8')
             update = telebot.types.Update.de_json(raw_data)
+            print(f"[Webhook Handler] Registered message handlers: {len(bot.message_handlers)}")
             print("Update received, passing to bot processor.")
             # Let the bot's internal router handle all update types
             start_time = time.time()
