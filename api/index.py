@@ -379,7 +379,7 @@ def webhook_and_index():
 
 # --- Setup Endpoint (Safe Version) ---
 @app.route('/set_webhook')
-def set_webhook():
+def set_webhook_manual():
     try:
         target_url = f"https://{PUBLIC_URL}/"
         print(f"Attempting to set webhook to: {target_url}")
@@ -405,3 +405,21 @@ def set_webhook():
     except Exception as e:
         print(f"Error in set_webhook: {e}")
         return f"An error occurred: {e}", 500
+
+# --- Automatic Webhook Setup on Application Start ---
+# This block will run when the Vercel function initializes.
+# It ensures the webhook is always set to the correct URL.
+try:
+    target_url = f"https://{PUBLIC_URL}/"
+    current_webhook_info = bot.get_webhook_info()
+
+    if not current_webhook_info or current_webhook_info.url != target_url:
+        print(f"Webhook not set or incorrect. Setting webhook to: {target_url}")
+        bot.remove_webhook()
+        time.sleep(0.5)
+        bot.set_webhook(url=target_url, secret_token=WEBHOOK_SECRET)
+        print("Webhook set command sent to Telegram during startup.")
+    else:
+        print(f"Webhook already correctly set to: {current_webhook_info.url}")
+except Exception as e:
+    print(f"Error during automatic webhook setup: {e}")
